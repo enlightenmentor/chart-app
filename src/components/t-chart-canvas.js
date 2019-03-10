@@ -1,4 +1,5 @@
 import { LitElement, html, svg, css } from 'lit-element';
+import throttle from '../utils/throttle.js';
 
 class TChartCanvas extends LitElement {
   static get styles() {
@@ -46,6 +47,12 @@ class TChartCanvas extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.dimensions = this._getDimensions(); 
+    window.addEventListener(
+      'resize',
+      throttle(() => {
+        this.dimensions = this._getDimensions(); 
+      }, 50)
+    ); 
   }
 
   _getDimensions() {
