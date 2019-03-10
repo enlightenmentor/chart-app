@@ -8,25 +8,22 @@ class TChartOverview extends LitElement {
         display: block;
         position: relative;
       }
-      .chart__canvas {
-        height: 100%;
-      }
-      .chart__viewport {
-        height: 100%;
-      }
     `;
   }
 
   render() {
     return html`
-      <t-chart-canvas class="chart__canvas" .data=${this.chart}></t-chart-canvas>
+      <t-chart-canvas
+        class="chart__canvas"
+        .chart=${this.chart}>
+      </t-chart-canvas>
       <!-- <div class="chart__viewport"></div> -->
     `;
   }
 
   static get properties() {
     return {
-      chart: Array,
+      chart: Array
     }
   }
 }

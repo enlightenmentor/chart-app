@@ -3,9 +3,6 @@ import { LitElement, html, svg, css } from 'lit-element';
 class TChartCanvas extends LitElement {
   static get styles() {
     return css`
-      :host {
-        display: block;
-      }
       svg {
         width: 100%;
         height: 100%;
@@ -14,21 +11,22 @@ class TChartCanvas extends LitElement {
   }
 
   render() {
-    this.viewBox = this._getViewBoxFromData(this.data.columns, this.dimensions);
-    let strokeWidth = this.viewBox.y/50;
+    this.viewBox = this._getViewBoxFromData(this.chart, this.dimensions);
+    const strokeWidth = this.viewBox.y/50;
 
     return svg`
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 ${this.viewBox.x} ${this.viewBox.y}">
-        ${this.data.columns.slice(1).map(column => {
-          let key = column[0];
-          let d = this._computePath(column);
+        ${this.chart.filter(set => set.visible).map(set => {
+          let d = this._computePath(set.points);
           return svg`
             <path
               d=${d}
               fill="none"
-              stroke="${this.data.colors[key]}"
+              stroke="${set.color}"
+              stroke-linecap="round"
+              stroke-linejoin="round"
               stroke-width=${strokeWidth}>
             </path>
           `;
@@ -39,7 +37,7 @@ class TChartCanvas extends LitElement {
 
   static get properties() {
     return {
-      data: Array,
+      chart: Array,
       dimensions: Object,
       viewBox: String
     }
@@ -51,31 +49,41 @@ class TChartCanvas extends LitElement {
   }
 
   _getDimensions() {
+    if (!this.offsetWidth || !this.offsetHeight) {
+      this.style = 'display: block; height: 100%;';
+    }
     return {
       width: this.offsetWidth,
       height: this.offsetHeight,
-      ratio: this.offsetWidth/this.offsetHeight
+      ratio: this.offsetWidth/this.offsetHeight || 1
     }
   }
 
-  _getViewBoxFromData(columns, d) {
-    let y = columns.slice(1).reduce((acc, column) => {
-      return acc.concat(column.slice(1));
-    }, []).reduce((max, val) => {
-      return val > max ? val : max;
-    }, 0);
+  _getViewBoxFromData(chart, d) {
+    let y = chart
+      .filter(set => set.visible)
+      .reduce((acc, set) => acc.concat(set.points), [])
+      .reduce((max, point) => point.y > max ? point.y : max, 0);
+    y = this._normilizeCoord(y)
     y *= 1.1;
     let x = d.ratio*y;
     return {x, y};
   }
 
-  _computePath(data) {
-    const xStep = this.viewBox.x/(data.length-2);
-    return data.slice(1).reduce((path, val, i) => {
+  _computePath(set) {
+    const xStep = this.viewBox.x/(set.length-1);
+    return set.reduce((path, point, i) => {
       let x = xStep*i;
-      let y = this.viewBox.y - val;
+      let y = point.y*this.normalizer;
+      y = this.viewBox.y - y;
       return `${path}${x} ${y}L`;
-    }, "M").slice(0, -1);
+    }, 'M').slice(0, -1);
+  }
+
+  _normilizeCoord(n) {
+    let order = Math.floor(n).toString().length;
+    this.normalizer = Math.pow(10, 3-order)
+    return n*this.normalizer;
   }
 }
 

@@ -46,7 +46,7 @@ class AppRoot extends LitElement {
 
   static get properties() {
     return {
-      charts: Object,
+      charts: Array,
       theme: {
         type: String,
         reflect: true
@@ -57,11 +57,32 @@ class AppRoot extends LitElement {
   constructor() {
     super();
     this.theme = 'light';
-    this.charts = chartData;
+    this.charts = this._parseRowData(chartData);
   }
 
   themeChanged(e) {
     this.theme = e.detail.value;
+  }
+
+  _parseRowData(data) {
+    const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return data.map(chart => {
+      return chart.columns.slice(1).map(set => {
+        let key = set[0];
+        return {
+          label: chart.names[key],
+          color: chart.colors[key],
+          visible: true,
+          points: set.slice(1).map((val, i) => {
+            let t = new Date(chart.columns[0][i+1]);
+            return {
+              x: `${MONTHS_SHORT[t.getMonth()]} ${t.getDate()}`,
+              y: val
+            }
+          })
+        }
+      });
+    });
   }
 }
 

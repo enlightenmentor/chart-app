@@ -15,6 +15,7 @@ class TRadioButton extends LitElement {
       }
       slot {
         color: var(--primary-text);
+        font-size: 0.875rem;
       }
       .button {
         display: flex;

@@ -40,11 +40,12 @@ class TChartWrapper extends LitElement {
         .chart="${this.chart}">
       </t-chart-overview>
       <div class="app__actions">
-        ${Object.keys(this.chart.names).map(key => html`
+        ${this.chart.map((set,i) => html`
           <t-radio-button
-            checked
-            style="--radio-button-color: ${this.chart.colors[key]}">
-            ${this.chart.names[key]}
+            ?checked=${set.visible}
+            @checked-changed=${this.changeVisibility.bind(this,i)}
+            style="--radio-button-color: ${set.color}">
+            ${set.label}
           </t-radio-button>
         `)}
       </div>
@@ -54,8 +55,13 @@ class TChartWrapper extends LitElement {
   static get properties() {
     return {
       title: String,
-      chart: Object
+      chart: Array
     }
+  }
+
+  changeVisibility(i, e) {
+    this.chart[i] = Object.assign(this.chart[i], { visible: e.detail.value });
+    this.chart = this.chart.slice();
   }
 }
 
