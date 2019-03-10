@@ -24,6 +24,7 @@ class TRadioButton extends LitElement {
         padding: 0.5rem 1rem 0.5rem 0.5rem;
         border-radius: 99rem;
         cursor: pointer;
+        outline: none;
       }
       .toggler {
         display: flex;
