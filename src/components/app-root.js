@@ -1,54 +1,41 @@
 import { LitElement, html, css } from 'lit-element';
+import generateRandomData from '../utils/random-data.js';
 import './t-radio-button.js';
-
-function generateRandomData() {
-  function randInt(n) {
-    return Math.round((Math.random()*n));
-  }
-
-  function getCurrentYearDates() {
-    const NOW = new Date();
-    const TIMEZONE_OFFSET = NOW.getTimezoneOffset()*60*1000;
-    const DAY_DURATION = 24*60*60*1000;
-    const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Now","Dec"];
-
-    let currentYear = NOW.getFullYear().toString();
-    let yearTimestamp = new Date(currentYear).getTime()+TIMEZONE_OFFSET;
-    let daysLength = Math.floor((NOW.getTime()-yearTimestamp) / DAY_DURATION);
-
-    return new Array(daysLength).fill({}).map((day, i) => {
-      let date = new Date(yearTimestamp + i*DAY_DURATION);
-      return `${MONTHS_SHORT[date.getMonth()]} ${date.getDate()}`;
-    });
-  }
-
-  function randomFollowersForDates(dates, max) {
-    return dates.map(date => {
-      return {
-        date,
-        joined: randInt(250),
-        left: randInt(100)
-      }
-    });
-  }
-
-  return randomFollowersForDates(getCurrentYearDates());
-}
+import './t-theme-switch.js';
 
 class AppRoot extends LitElement {
   static get styles() {
     return css`
-      :host {
+      :host([theme="light"]) {
         --green: #3cc23f;
         --red: #f34c44;
+        --accent: #1676f4;
+        --primary-text: #192434;
+        --tertiary-text: hsla(214, 53%, 23%, 0.16);
+        --background: #ffffff;
       }
-      :host { display: block }
+      :host([theme="dark"]) {
+        --green: #3cc23f;
+        --red: #f34c44;
+        --accent: #1676f4;
+        --primary-text: hsla(0, 0%, 100%, 0.9);
+        --tertiary-text: hsla(0, 0%, 100%, 0.3);
+        --background: #192434;
+      }
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: var(--background);
+      }
       .app__title {
         padding: 1rem;
         margin: 0;
+        color: var(--primary-text);
       }
       .app__actions {
         display: flex;
+        flex: 1;
         padding: 1rem;
       }
       .app__joined-button {
@@ -57,6 +44,9 @@ class AppRoot extends LitElement {
       }
       .app__left-button {
         --radio-button-color: var(--red);
+      }
+      .app__theme-switch {
+        padding-bottom: 1rem;
       }
     `;
   }
@@ -68,18 +58,32 @@ class AppRoot extends LitElement {
         <t-radio-button class="app__joined-button" checked>Joined</t-radio-button>
         <t-radio-button class="app__left-button" checked>Left</t-radio-button>
       </div>
+      <t-theme-switch
+        .theme=${this.theme}
+        @theme-changed=${this.themeChanged}
+        class="app__theme-switch">
+      </t-theme-switch>
     `
   }
 
   static get properties() {
     return {
-      data: Object
+      data: Object,
+      theme: {
+        type: String,
+        reflect: true
+      }
     }
   }
 
   constructor() {
     super();
+    this.theme = 'light';
     this.data = generateRandomData();
+  }
+
+  themeChanged(e) {
+    this.theme = e.detail.value;
   }
 }
 

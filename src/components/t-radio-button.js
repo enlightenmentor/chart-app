@@ -4,8 +4,8 @@ class TRadioButton extends LitElement {
   static get styles() {
     return css`
       :host {
-        --radio-button-color: #1676f4;
-        --border-color: #dbdfe4;
+        --radio-button-color: var(--accent);
+        --border-color: var(--tertiary-text);
       }
 
       :host {
@@ -14,7 +14,7 @@ class TRadioButton extends LitElement {
         font-size: 0.75rem;
       }
       slot {
-        color: #192434;
+        color: var(--primary-text);
       }
       .button {
         display: flex;
@@ -23,6 +23,7 @@ class TRadioButton extends LitElement {
         border: 1px solid var(--border-color);
         padding: 0.5rem 1rem 0.5rem 0.5rem;
         border-radius: 99rem;
+        cursor: pointer;
       }
       .toggler {
         display: flex;
@@ -49,7 +50,7 @@ class TRadioButton extends LitElement {
         box-sizing: border-box;
         width: calc(1.5rem - 2px);
         height: calc(1.5rem - 2px);
-        background-color: white;
+        background-color: var(--background);
         border-radius: 50%;
         transition: transform 0.1s ease-in-out;
       }
@@ -70,7 +71,7 @@ class TRadioButton extends LitElement {
 
   render() {
     return html`
-      <button class="button" @click="${this.toggle}">
+      <button class="button" @click=${this.toggle}>
         <div class="toggler">
           <svg class="toggler-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path fill="none" d="M0 0h24v24H0V0z"/>
