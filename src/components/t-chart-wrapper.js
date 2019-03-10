@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'lit-element';
+import './t-chart-overview.js';
 import './t-radio-button.js';
 import './t-theme-switch.js';
 
@@ -16,8 +17,8 @@ class TChartWrapper extends LitElement {
       }
       .app__chart-overview {
         margin: 1rem 0.5rem;
-        height: 3.5rem;
-        background-color: lightgrey;
+        height: 5rem;
+        border: 1px solid var(--tertiary-text);
       }
       .app__actions {
         display: flex;
@@ -33,6 +34,11 @@ class TChartWrapper extends LitElement {
   render() {
     return html`
       <h3 class="app__title">${this.title}</h3>
+      <t-chart></t-chart>
+      <t-chart-overview
+        class="app__chart-overview"
+        .chart="${this.chart}">
+      </t-chart-overview>
       <div class="app__actions">
         ${Object.keys(this.chart.names).map(key => html`
           <t-radio-button
