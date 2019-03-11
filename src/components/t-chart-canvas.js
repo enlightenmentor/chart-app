@@ -1,5 +1,6 @@
 import { LitElement, html, svg, css } from 'lit-element';
 import throttle from '../utils/throttle.js';
+import animateValue from '../utils/animate.js';
 
 class TChartCanvas extends LitElement {
   static get styles() {
@@ -105,28 +106,21 @@ class TChartCanvas extends LitElement {
   }
 
   _animateViewBox() {
-    let y = this._getViewBoxHeight() * this.normalizer;
-    const ratio = this.offsetWidth/this.offsetHeight;
-    function easeOutQuad(t) { return t*(2-t) };
-    if (y && this.viewBox.y != y) {
-      const DURATION = 200;
-      const start = new Date().getTime();
-      let difference = y - this.viewBox.y;
-      let initY = this.viewBox.y;
-      (function animation() {
-        let t = (new Date().getTime() - start) / DURATION;
-        t = t > 1 ? 1 : t;
-        let progress = easeOutQuad(t);
-        let newY = initY + (difference * progress);
+    const y = this._getViewBoxHeight() * this.normalizer;
+    const initY = this.viewBox.y;
+    if (y && initY != y) {
+      const ratio = this.offsetWidth/this.offsetHeight;
+      const animation = animateValue([initY, y], {
+        duration: 200,
+        easing: 'EASE_OUT_QUAD'
+      });
+      animation(val => {
         this.viewBox = Object.assign({}, this.viewBox, {
-          x: newY*ratio,
-          y: newY
+          x: val*ratio,
+          y: val
         });
         this.strokeWidth = this.viewBox.y/50;
-        if (progress < 1) { 
-          requestAnimationFrame(animation.bind(this));
-        }
-      }).call(this);
+      });
     }
   }
 }
