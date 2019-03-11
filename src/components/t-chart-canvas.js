@@ -8,7 +8,7 @@ class TChartCanvas extends LitElement {
         width: 100%;
         height: 100%;
       }
-      path { transition: opacity 0.3s }
+      path { transition: opacity 0.2s }
       path.hidden { opacity: 0 }
     `;
   }
@@ -41,6 +41,7 @@ class TChartCanvas extends LitElement {
     return {
       chart: Array,
       _prevVisibleSets: Number,
+      _animating: Boolean,
       viewBox: String,
       strokeWidth: Number
     }
@@ -48,6 +49,7 @@ class TChartCanvas extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this._animating = false;
     this._computeViewBox();
     window.addEventListener(
       'resize',
@@ -94,7 +96,7 @@ class TChartCanvas extends LitElement {
   _checkVisibleSets() {
     let visibleSets = this.chart.filter(set => set.visible).length;
     if (
-      this._prevVisibleSets && 
+      this._prevVisibleSets != null && 
       visibleSets != this._prevVisibleSets
     ) {
       this._animateViewBox();
@@ -104,8 +106,27 @@ class TChartCanvas extends LitElement {
 
   _animateViewBox() {
     let y = this._getViewBoxHeight() * this.normalizer;
+    const ratio = this.offsetWidth/this.offsetHeight;
+    function easeOutQuad(t) { return t*(2-t) };
     if (y && this.viewBox.y != y) {
-      console.log(this.viewBox.y, y);
+      const DURATION = 200;
+      const start = new Date().getTime();
+      let difference = y - this.viewBox.y;
+      let initY = this.viewBox.y;
+      (function animation() {
+        let t = (new Date().getTime() - start) / DURATION;
+        t = t > 1 ? 1 : t;
+        let progress = easeOutQuad(t);
+        let newY = initY + (difference * progress);
+        this.viewBox = Object.assign({}, this.viewBox, {
+          x: newY*ratio,
+          y: newY
+        });
+        this.strokeWidth = this.viewBox.y/50;
+        if (progress < 1) { 
+          requestAnimationFrame(animation.bind(this));
+        }
+      }).call(this);
     }
   }
 }

@@ -14,13 +14,12 @@ Make sure you have [`node`](https://nodejs.org/en/) installed on your machine
 ```
   npm start
 ```
-3) Build the app for production and serve it:
+3) Start server for es5 browsers:
+```
+  npm run start:es5
+```
+4) Build the app for production and serve it:
 ```
   npm run build
   npm run start:build
-```
-4) Build the app for production and serve it for old browsers:
-```
-  npm run build
-  npm run start:es5
 ```
