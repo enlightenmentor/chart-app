@@ -1,5 +1,6 @@
 import { LitElement, html, css, svg } from 'lit-element';
 import './t-chart-canvas.js';
+import './t-chart-viewport.js';
 
 class TChartOverview extends LitElement {
   static get styles() {
@@ -7,6 +8,13 @@ class TChartOverview extends LitElement {
       :host {
         display: block;
         position: relative;
+      }
+      .chart__viewport {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
     `;
   }
@@ -17,7 +25,11 @@ class TChartOverview extends LitElement {
         class="chart__canvas"
         .chart=${this.chart}>
       </t-chart-canvas>
-      <!-- <div class="chart__viewport"></div> -->
+      <t-chart-viewport
+        width="25%"
+        offset="75%"
+        class="chart__viewport">
+      </t-chart-viewport>
     `;
   }
 
