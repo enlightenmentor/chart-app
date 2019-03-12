@@ -36,6 +36,7 @@ class TChartViewport extends LitElement {
         width: 100%;
         border-top: 2px solid var(--overflow-border);
         border-bottom: 2px solid var(--overflow-border);
+        touch-action: none;
         cursor: grab;
       }
       #rightBorder, #leftBorder {
@@ -51,7 +52,7 @@ class TChartViewport extends LitElement {
     const wFr = this.width;
     const wFrShift = (1/wFr)*this.offset*100;
     const rFr = 1-this.offset-this.width;
-    const bWidth = 8/wFr;
+    const bWidth = 12/wFr;
 
     return html`
       <div
