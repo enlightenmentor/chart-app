@@ -62,6 +62,14 @@ class AppRoot extends LitElement {
 
   themeChanged(e) {
     this.theme = e.detail.value;
+    switch(this.theme) {
+      case "light":
+        document.body.style.backgroundColor = "#ffffff";
+        break;
+      case "dark":
+        document.body.style.backgroundColor = "#192434";
+        break;
+    }
   }
 
   _parseRowData(data) {
