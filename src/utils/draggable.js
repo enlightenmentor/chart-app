@@ -1,6 +1,4 @@
-let dragCb;
-
-function dispatchDragEvent(node, name, mouseevent, prevX, prevY) {
+function dispatchDragEvent(node, name, mouseevent, prevX, prevY, dragCb) {
   const details = {
     x: mouseevent.x,
     y: mouseevent.y,
@@ -22,13 +20,14 @@ function dispatchDragEvent(node, name, mouseevent, prevX, prevY) {
     bubbles: true,
     detail: details
   })
-  node.dispatchEvent(event);
   dragCb && dragCb(event);
+  node.dispatchEvent(event);
 }
 
 export default function draggable(node) {
   let prevX = null;
   let prevY = null;
+  let dragCb;
 
   const startCallback = (event) => {
     if (event.which === 1) {
@@ -36,13 +35,13 @@ export default function draggable(node) {
       prevY = event.y;
       window.addEventListener('mousemove', dragCallback);
       window.addEventListener('mouseup', endCallback);
-      dispatchDragEvent(node, 'draggingstart', event, prevX, prevY);
+      dispatchDragEvent(node, 'draggingstart', event, prevX, prevY, dragCb);
     }
   };
 
   const dragCallback = (event) => {
     event.preventDefault();
-    dispatchDragEvent(node, 'dragging', event, prevX, prevY);
+    dispatchDragEvent(node, 'dragging', event, prevX, prevY, dragCb);
     prevX = event.x;
     prevY = event.y;
   };
@@ -50,7 +49,7 @@ export default function draggable(node) {
   const endCallback = (event) => {
     window.removeEventListener('mousemove', dragCallback);
     window.removeEventListener('mouseup', endCallback);
-    dispatchDragEvent(node, 'draggingend', event, prevX, prevY);
+    dispatchDragEvent(node, 'draggingend', event, prevX, prevY, dragCb);
     prevX = null;
     prevY = null;
   };

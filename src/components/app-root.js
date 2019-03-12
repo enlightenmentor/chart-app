@@ -60,18 +60,18 @@ class AppRoot extends LitElement {
 
   constructor() {
     super();
-    this.theme = 'light';
+    this.theme = 'dark';
     this.charts = this._parseRowData(chartData);
   }
 
   themeChanged(e) {
     this.theme = e.detail.value;
     switch(this.theme) {
-      case "light":
-        document.body.style.backgroundColor = "#ffffff";
+      case 'light':
+        document.body.style.backgroundColor = '#ffffff';
         break;
-      case "dark":
-        document.body.style.backgroundColor = "#192434";
+      case 'dark':
+        document.body.style.backgroundColor = '#192434';
         break;
     }
   }
