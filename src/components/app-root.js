@@ -9,7 +9,7 @@ class AppRoot extends LitElement {
         --accent: #1676f4;
         --primary-text: #192434;
         --tertiary-text: hsla(214, 53%, 23%, 0.16);
-        --overflow-background: hsla(210, 60%, 95%, 0.6);
+        --overflow-background: hsla(210, 60%, 95%, 0.7);
         --overflow-border: hsla(216, 15%, 80%, 0.6);
         --background: #ffffff;
         --color-tr-duration: 0.3s;

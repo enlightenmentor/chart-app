@@ -35,15 +35,16 @@ class TChartViewport extends LitElement {
       }
       #windowBox {
         width: 100%;
-        border-top: 2px solid var(--overflow-border);
-        border-bottom: 2px solid var(--overflow-border);
+        border-top: 1px solid var(--overflow-border);
+        border-bottom: 1px solid var(--overflow-border);
         transition: border-color var(--color-tr-duration);
         touch-action: none;
         cursor: grab;
       }
       #rightBorder, #leftBorder {
         width: 100px;
-        background-color: var(--overflow-border);
+        box-sizing: border-box;
+        transition: border-color var(--color-tr-duration);
         cursor: ew-resize;
       }
     `;
@@ -54,7 +55,8 @@ class TChartViewport extends LitElement {
     const wFr = this.width;
     const wFrShift = (1/wFr)*this.offset*100;
     const rFr = 1-this.offset-this.width;
-    const bWidth = 12/wFr;
+    const bWidth = 15/wFr;
+    const bBWidth = 6/wFr;
 
     return html`
       <div
@@ -66,14 +68,14 @@ class TChartViewport extends LitElement {
         style="transform: scaleX(${wFr}) translateX(${wFrShift}%)">
         <div
           id="leftBorder"
-          style="width: ${bWidth}px">
+          style="width: ${bWidth}px; border-left: ${bBWidth}px solid var(--overflow-border)">
         </div>
         <div
           id="window">
         </div>
         <div
           id="rightBorder"
-          style="width: ${bWidth}px">
+          style="width: ${bWidth}px; border-right: ${bBWidth}px solid var(--overflow-border)">
         </div>
       </div>
       <div
