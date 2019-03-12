@@ -19,6 +19,7 @@ class TChartCanvas extends LitElement {
     return svg`
       <svg
         xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
         viewBox="0 0 ${this.viewBox.x} ${this.viewBox.y}">
         ${this.chart.map(set => {
           let d = this._computePath(set.points);
@@ -54,7 +55,7 @@ class TChartCanvas extends LitElement {
     this._computeViewBox();
     window.addEventListener(
       'resize',
-      throttle(this._computeViewBox.bind(this), 50)
+      throttle(this._computeViewBox.bind(this), 1000/10)
     );
   }
 

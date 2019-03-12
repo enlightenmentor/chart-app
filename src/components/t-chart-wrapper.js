@@ -23,10 +23,11 @@ class TChartWrapper extends LitElement {
       .app__actions {
         display: flex;
         flex: 1;
+        flex-wrap: wrap;
         margin: 1rem 0.5rem;
       }
-      .app__actions > *:not(:last-child) {
-        margin-right: 0.5rem;
+      .app__set-checker {
+        margin: 0 0.5rem 0.5rem 0;
       }
     `;
   }
@@ -42,6 +43,7 @@ class TChartWrapper extends LitElement {
       <div class="app__actions">
         ${this.chart.map((set,i) => html`
           <t-radio-button
+            class="app__set-checker"
             ?checked=${set.visible}
             @checked-changed=${this.changeVisibility.bind(this,i)}
             style="--radio-button-color: ${set.color}">

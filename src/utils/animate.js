@@ -17,7 +17,7 @@ export default function animate(data, options) { // {data:[from,to],options.{dur
   const duration = options.duration;
   const ease = easing[options.easing] || easing.LINEAR;
 
-  let startTimestamp, onTick;
+  let startTimestamp, onTick, onFinish;
 
   function update() {
     let tProgress = (new Date().getTime() - startTimestamp) / duration;
@@ -28,6 +28,8 @@ export default function animate(data, options) { // {data:[from,to],options.{dur
     onTick && onTick(updatedValue);
     if (progress < 1) {
       requestAnimationFrame(update);
+    } else {
+      onFinish();
     }
   }
 
@@ -35,5 +37,6 @@ export default function animate(data, options) { // {data:[from,to],options.{dur
     onTick = cb;
     startTimestamp = new Date().getTime();
     requestAnimationFrame(update);
+    return new Promise(resolve => { onFinish = resolve });
   };
 }
