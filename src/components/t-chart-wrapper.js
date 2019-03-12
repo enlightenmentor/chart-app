@@ -18,7 +18,6 @@ class TChartWrapper extends LitElement {
       .app__chart-overview {
         margin: 1rem 0.5rem;
         height: 5rem;
-        border: 1px solid var(--tertiary-text);
       }
       .app__actions {
         display: flex;

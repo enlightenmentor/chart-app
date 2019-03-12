@@ -26,8 +26,8 @@ class TChartOverview extends LitElement {
         .chart=${this.chart}>
       </t-chart-canvas>
       <t-chart-viewport
-        width="25%"
-        offset="75%"
+        width="0.25"
+        offset="0.5"
         class="chart__viewport">
       </t-chart-viewport>
     `;

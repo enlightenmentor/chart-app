@@ -9,13 +9,17 @@ class AppRoot extends LitElement {
         --accent: #1676f4;
         --primary-text: #192434;
         --tertiary-text: hsla(214, 53%, 23%, 0.16);
+        --overflow-background: hsla(210, 60%, 95%, 0.6);
+        --overflow-border: hsla(216, 15%, 80%, 0.6);
         --background: #ffffff;
       }
       :host([theme="dark"]) {
         --accent: #1676f4;
         --primary-text: hsla(0, 0%, 100%, 0.9);
         --tertiary-text: hsla(0, 0%, 100%, 0.3);
-        --background: #192434;
+        --overflow-background: hsla(216, 35%, 11%, 0.7);
+        --overflow-border: hsla(214, 20%, 50%, 0.5);
+        --background: hsl(216, 35%, 15%);
       }
       :host {
         display: flex;
