@@ -9,7 +9,7 @@ class TChartCanvas extends LitElement {
         width: 100%;
         height: 100%;
       }
-      path { transition: opacity 0.2s }
+      path { transition: opacity 200ms }
       path.hidden { opacity: 0 }
     `;
   }
@@ -20,7 +20,7 @@ class TChartCanvas extends LitElement {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
-        viewBox="0 0 ${this.viewBox.x} ${this.viewBox.y}">
+        viewBox="0 0 ${this.width} ${this.height}">
         ${this.chart.map(set => {
           let d = this._computePath(set.points);
           return svg`
@@ -31,7 +31,7 @@ class TChartCanvas extends LitElement {
               stroke="${set.color}"
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width=${this.strokeWidth}>
+              stroke-width="1">
             </path>
           `;
         })}
@@ -42,46 +42,42 @@ class TChartCanvas extends LitElement {
   static get properties() {
     return {
       chart: Array,
-      _prevVisibleSets: Number,
-      _animating: Boolean,
-      viewBox: String,
-      strokeWidth: Number
+      width: Number,
+      height: Number,
+      xScale: Number,
+      yScale: Number,
+      _prevVisibleSets: Number
     }
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this._animating = false;
-    this._computeViewBox();
+    this._defineDimensions();
     window.addEventListener(
       'resize',
-      throttle(this._computeViewBox.bind(this), 1000/10)
+      throttle(this._defineDimensions.bind(this), 1000/10)
     );
   }
 
-  _computeViewBox() {
+  _defineDimensions() {
     if (!this.offsetWidth || !this.offsetHeight) {
       this.style = 'display: block; height: 100%';
     }
-    const ratio = this.offsetWidth/this.offsetHeight;
-    let y = this._getViewBoxHeight();
-    y = this._normilizeCoord(y);
-    let x = ratio*y;
-    this.viewBox = {x, y};
-    this.strokeWidth = this.viewBox.y/50;
+    this.width = this.offsetWidth;
+    this.height = this.offsetHeight;
+    this.yScale = this.height/this._getDataHeight();
+    this.xScale = this.width/this._getDataWidth();
   }
 
   _computePath(set) {
-    const xStep = this.viewBox.x/(set.length-1);
     return set.reduce((path, point, i) => {
-      let x = xStep*i;
-      let y = point.y*this.normalizer;
-      y = this.viewBox.y - y;
+      let x = (i * this.xScale).toFixed(4);
+      let y = (this.height - point.y*this.yScale).toFixed(4);
       return `${path}${x} ${y}L`;
     }, 'M').slice(0, -1);
   }
 
-  _getViewBoxHeight() {
+  _getDataHeight() {
     let y = this.chart
       .filter(set => set.visible)
       .reduce((acc, set) => acc.concat(set.points), [])
@@ -89,40 +85,32 @@ class TChartCanvas extends LitElement {
     return y * 1.1;
   }
 
-  _normilizeCoord(n) {
-    let order = Math.floor(n).toString().length;
-    this.normalizer = Math.pow(10, 3-order)
-    return n*this.normalizer;
+  _getDataWidth() {
+    let x = this.chart[0].points.length;
+    return x - 1;
   }
+  
 
   _checkVisibleSets() {
-    let visibleSets = this.chart.filter(set => set.visible).length;
+    let newVisibleSets = this.chart.filter(set => set.visible).length;
     if (
       this._prevVisibleSets != null && 
-      visibleSets != this._prevVisibleSets
+      newVisibleSets != 0 &&
+      newVisibleSets != this._prevVisibleSets
     ) {
-      this._animateViewBox();
+      this._animateScale();
     }
-    this._prevVisibleSets = visibleSets;
+    this._prevVisibleSets = newVisibleSets;
   }
 
-  _animateViewBox() {
-    const y = this._getViewBoxHeight() * this.normalizer;
-    const initY = this.viewBox.y;
-    if (y && initY != y) {
-      const ratio = this.offsetWidth/this.offsetHeight;
-      const animation = animateValue([initY, y], {
-        duration: 200,
-        easing: 'EASE_OUT_QUAD'
-      });
-      animation(val => {
-        this.viewBox = Object.assign({}, this.viewBox, {
-          x: val*ratio,
-          y: val
-        });
-        this.strokeWidth = this.viewBox.y/50;
-      });
-    }
+  _animateScale() {
+    const from = this.yScale;
+    const to = this.height/this._getDataHeight();
+    const animation = animateValue([from, to], {
+      duration: 200,
+      easing: 'EASE_OUT_QUAD'
+    });
+    animation(val => { this.yScale = val });
   }
 }
 
