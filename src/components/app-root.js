@@ -12,6 +12,7 @@ class AppRoot extends LitElement {
         --overflow-background: hsla(210, 60%, 95%, 0.6);
         --overflow-border: hsla(216, 15%, 80%, 0.6);
         --background: #ffffff;
+        --color-tr-duration: 0.3s;
       }
       :host([theme="dark"]) {
         --accent: #1676f4;
@@ -20,11 +21,13 @@ class AppRoot extends LitElement {
         --overflow-background: hsla(216, 35%, 11%, 0.7);
         --overflow-border: hsla(214, 20%, 50%, 0.5);
         --background: hsl(216, 35%, 15%);
+        --color-tr-duration: 0.3s;
       }
       :host {
         display: flex;
         flex-direction: column;
         background-color: var(--background);
+        transition: background-color var(--color-tr-duration);
       }
       .app__theme-switch {
         margin: 1rem 0 2rem;
@@ -60,7 +63,7 @@ class AppRoot extends LitElement {
 
   constructor() {
     super();
-    this.theme = 'dark';
+    this.theme = 'light';
     this.charts = this._parseRowData(chartData);
   }
 

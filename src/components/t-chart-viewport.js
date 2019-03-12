@@ -15,6 +15,7 @@ class TChartViewport extends LitElement {
         box-sizing: border-box;
         position: absolute;
         top: 0;
+        transition: background-color var(--color-tr-duration);
       }
       #leftOverflow, #windowBox, #window, #leftBorder {
         transform-origin: left;
@@ -36,6 +37,7 @@ class TChartViewport extends LitElement {
         width: 100%;
         border-top: 2px solid var(--overflow-border);
         border-bottom: 2px solid var(--overflow-border);
+        transition: border-color var(--color-tr-duration);
         touch-action: none;
         cursor: grab;
       }
@@ -96,14 +98,8 @@ class TChartViewport extends LitElement {
         type: Number,
         reflect: true
       },
-      _vWidth: {
-        type: Number,
-        reflect: true
-      },
-      _vOffset: {
-        type: Number,
-        reflect: true
-      },
+      _vWidth: Number,
+      _vOffset: Number,
     }
   }
 

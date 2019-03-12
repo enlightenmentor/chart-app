@@ -14,6 +14,7 @@ class TChartWrapper extends LitElement {
       .app__title {
         margin: 1rem;
         color: var(--primary-text);
+        transition: color var(--color-tr-duration);
       }
       .app__chart-overview {
         margin: 1rem 0.5rem;
