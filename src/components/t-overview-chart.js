@@ -1,8 +1,8 @@
 import { LitElement, html, css, svg } from 'lit-element';
-import './t-chart-canvas.js';
+import './t-overview-chart-renderer.js';
 import './t-chart-viewport.js';
 
-class TChartOverview extends LitElement {
+class TOverviewChart extends LitElement {
   static get styles() {
     return css`
       :host {
@@ -21,14 +21,14 @@ class TChartOverview extends LitElement {
 
   render() {
     return html`
-      <t-chart-canvas
+      <t-overview-chart-renderer
         class="chart__canvas"
         .chart=${this.chart}>
-      </t-chart-canvas>
+      </t-overview-chart-renderer>
       <t-chart-viewport
-        width="0.25"
+        width="${this.width}"
         min-width="0.1"
-        offset="0.5"
+        offset="${this.offset}"
         class="chart__viewport">
       </t-chart-viewport>
     `;
@@ -36,9 +36,11 @@ class TChartOverview extends LitElement {
 
   static get properties() {
     return {
-      chart: Array
+      chart: Array,
+      width: Number,
+      offset: Number,
     }
   }
 }
 
-customElements.define('t-chart-overview', TChartOverview);
+customElements.define('t-overview-chart', TOverviewChart);

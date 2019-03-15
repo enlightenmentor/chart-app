@@ -129,72 +129,91 @@ class TChartViewport extends LitElement {
   _initDraggables() {
     draggable(
       this.shadowRoot.querySelector('#leftBorder')
-    ).onDrag(e => {
-      switch(e.type) {
-        case 'dragging':
-          let frD = e.detail.movementX/this._pixelWidth;
-          this._vOffset += frD;
-          this._vWidth -= frD;
-          let vROffset = 1-this._vOffset-this._vWidth;
-          if (this._vOffset < 0) {
-            this.offset = 0;
-            this.width = 1-vROffset;
-          } else if (this._vWidth < this.minWidth) {
-            this.offset = 1-vROffset-this.minWidth;
-            this.width = this.minWidth;
-          } else {
-            this.offset = this._vOffset;
-            this.width = this._vWidth;
-          }
-          break;
-        case 'draggingend':
-          this._vOffset = this.offset;
-          this._vWidth = this.width;
-          break;
-      }
-
-    });
+    ).onDrag(this._leftBorderDragged.bind(this));
     draggable(
       this.shadowRoot.querySelector('#rightBorder')
-    ).onDrag(e => {
-      switch(e.type) {
-        case 'dragging':
-          let frD = e.detail.movementX/this._pixelWidth;
-          this._vWidth += frD;
-          let vROffset = 1-this._vOffset-this._vWidth;
-
-          if (vROffset < 0) {
-            this.width = 1-this._vOffset;
-          } else if (this._vWidth < this.minWidth) {
-            this.width = this.minWidth;
-          } else {
-            this.width = this._vWidth;
-          }
-          break;
-        case 'draggingend':
-          this._vWidth = this.width;
-      }
-    });
+    ).onDrag(this._rightBorderDragged.bind(this));
     draggable(
       this.shadowRoot.querySelector('#window')
-    ).onDrag(e => {
-      switch(e.type) {
-        case 'dragging':
-          let frD = e.detail.movementX/this._pixelWidth;
-          this._vOffset += frD;
-          let vROffset = 1-this._vOffset-this._vWidth;
-          if (this._vOffset < 0) {
-            this.offset = 0;
-          } else if (vROffset < 0) {
-            this.offset = 1-this._vWidth;
-          } else {
-            this.offset = this._vOffset;
-          }
-          break;
-        case 'draggingend':
-          this._vOffset = this.offset;
+    ).onDrag(this._windowDragged.bind(this));
+  }
+
+  _leftBorderDragged(e) {
+    switch(e.type) {
+      case 'dragging':
+        let frD = e.detail.movementX/this._pixelWidth;
+        this._vOffset += frD;
+        this._vWidth -= frD;
+        let vROffset = 1-this._vOffset-this._vWidth;
+        if (this._vOffset < 0) {
+          this.offset = 0;
+          this.width = 1-vROffset;
+        } else if (this._vWidth < this.minWidth) {
+          this.offset = 1-vROffset-this.minWidth;
+          this.width = this.minWidth;
+        } else {
+          this.offset = this._vOffset;
+          this.width = this._vWidth;
+        }
+        this._fireFractionsChange();
+        break;
+      case 'draggingend':
+        this._vOffset = this.offset;
+        this._vWidth = this.width;
+        break;
+    }
+  }
+
+  _rightBorderDragged(e) {
+    switch(e.type) {
+      case 'dragging':
+        let frD = e.detail.movementX/this._pixelWidth;
+        this._vWidth += frD;
+        let vROffset = 1-this._vOffset-this._vWidth;
+
+        if (vROffset < 0) {
+          this.width = 1-this._vOffset;
+        } else if (this._vWidth < this.minWidth) {
+          this.width = this.minWidth;
+        } else {
+          this.width = this._vWidth;
+        }
+        this._fireFractionsChange();
+        break;
+      case 'draggingend':
+        this._vWidth = this.width;
+    }
+  }
+
+  _windowDragged(e) {
+    switch(e.type) {
+      case 'dragging':
+        let frD = e.detail.movementX/this._pixelWidth;
+        this._vOffset += frD;
+        let vROffset = 1-this._vOffset-this._vWidth;
+        if (this._vOffset < 0) {
+          this.offset = 0;
+        } else if (vROffset < 0) {
+          this.offset = 1-this._vWidth;
+        } else {
+          this.offset = this._vOffset;
+        }
+        this._fireFractionsChange();
+        break;
+      case 'draggingend':
+        this._vOffset = this.offset;
+    }
+  }
+
+  _fireFractionsChange() {
+    this.dispatchEvent(new CustomEvent('fractions-changed', {
+      composed: true,
+      bubbles: true,
+      detail: {
+        width: this.width,
+        offset: this.offset
       }
-    });
+    }));
   }
 }
 

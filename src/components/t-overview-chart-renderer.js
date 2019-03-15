@@ -2,7 +2,7 @@ import { LitElement, html, svg, css } from 'lit-element';
 import throttle from '../utils/throttle.js';
 import animateValue from '../utils/animate.js';
 
-class TChartCanvas extends LitElement {
+class TOverviewChartRenderer extends LitElement {
   static get styles() {
     return css`
       svg {
@@ -70,8 +70,8 @@ class TChartCanvas extends LitElement {
   }
 
   _computePath(set) {
-    return set.reduce((path, point, i) => {
-      let x = (i * this.xScale).toFixed(4);
+    return set.reduce((path, point) => {
+      let x = (point.x * this.xScale).toFixed(4);
       let y = (this.height - point.y*this.yScale).toFixed(4);
       return `${path}${x} ${y}L`;
     }, 'M').slice(0, -1);
@@ -114,4 +114,4 @@ class TChartCanvas extends LitElement {
   }
 }
 
-customElements.define('t-chart-canvas', TChartCanvas);
+customElements.define('t-overview-chart-renderer', TOverviewChartRenderer);

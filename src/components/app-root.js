@@ -18,9 +18,9 @@ class AppRoot extends LitElement {
         --accent: #1676f4;
         --primary-text: hsla(0, 0%, 100%, 0.9);
         --tertiary-text: hsla(0, 0%, 100%, 0.3);
-        --overflow-background: hsla(216, 35%, 11%, 0.7);
+        --overflow-background: hsla(214, 29%, 14%, 0.7);
         --overflow-border: hsla(214, 20%, 50%, 0.5);
-        --background: hsl(216, 35%, 15%);
+        --background: hsl(215, 27%, 19%);
         --color-tr-duration: 0.3s;
       }
       :host {
@@ -28,6 +28,8 @@ class AppRoot extends LitElement {
         flex-direction: column;
         background-color: var(--background);
         transition: background-color var(--color-tr-duration);
+        max-width: 40rem;
+        margin: auto;
       }
       .app__theme-switch {
         margin: 1rem 0 2rem;
@@ -74,7 +76,7 @@ class AppRoot extends LitElement {
         document.body.style.backgroundColor = '#ffffff';
         break;
       case 'dark':
-        document.body.style.backgroundColor = '#192434';
+        document.body.style.backgroundColor = 'hsl(215, 27%, 19%)';
         break;
     }
   }
@@ -91,8 +93,9 @@ class AppRoot extends LitElement {
           points: set.slice(1).map((val, i) => {
             let t = new Date(chart.columns[0][i+1]);
             return {
-              x: `${MONTHS_SHORT[t.getMonth()]} ${t.getDate()}`,
-              y: val
+              x: i,
+              y: val,
+              label: `${MONTHS_SHORT[t.getMonth()]} ${t.getDate()}`,
             }
           })
         }
