@@ -40,7 +40,6 @@ class TChartWrapper extends LitElement {
   }
 
   render() {
-    // this.mainChart = this._computeMainChart();
     return html`
       <h3 class="app__title">${this.title}</h3>
       <t-main-chart
@@ -100,45 +99,6 @@ class TChartWrapper extends LitElement {
   _fractionsChanged(e) {
     this.viewportWidth = e.detail.width;
     this.viewportOffset = e.detail.offset;
-  }
-
-  _computeMainChart() {
-    const o = this.viewportOffset;
-    const w = this.viewportWidth;
-    let i0 = this.chart[0].points.length*o;
-    let i1 = this.chart[0].points.length*(o+w);
-    return this.chart.map(set => {
-      return Object.assign({}, set, {
-        points: this._getSlicedArray(set.points, i0, i1)
-      })
-    });
-  }
-
-  _getSlicedArray(arr, i0, i1) {
-    const in0 = Math.floor(i0);
-    const in1 = Math.floor(i1);
-    let res = arr.slice(i0,i1);
-    res[0] = {
-      x: i0,
-      y: arr[in0].y+(arr[in0].y-arr[in0+1].y)*(i0-in0),
-      label: res[0].label
-    }
-    let lastY;
-    if (in1 === arr.length) {
-      lastY = arr[in1-1].y
-    } else {
-      lastY = arr[in1-1].y+(arr[in1-1].y-arr[in1].y)*(i1-in1)
-    }
-    res.push({
-      x: i1,
-      y: lastY,
-      label: res[res.length-1].label
-    });
-    return res.map(point => ({
-      x: point.x-i0,
-      y: point.y,
-      label: point.label
-    }));
   }
 }
 

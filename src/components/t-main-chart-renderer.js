@@ -1,20 +1,17 @@
 import { LitElement, html, svg, css } from 'lit-element';
+import { repeat } from 'lit-html/directives/repeat';
 import throttle from '../utils/throttle.js';
 import animateValue from '../utils/animate.js';
 
 class TMainChartRenderer extends LitElement {
   static get styles() {
     return css`
-      svg {
-        width: 100%;
-        height: 100%;
-      }
       text {
-        font-size: 0.875rem;
+        font-size: 14px;
         fill: var(--secondary-text);
         transition: fill var(--color-tr-duration);
       }
-      .chart__axe {
+      .chart__yAxe {
         fill: none;
         stroke-linecap: round;
         stroke-width: 1;
@@ -29,6 +26,12 @@ class TMainChartRenderer extends LitElement {
         transition: opacity 200ms;
       }
       .chart__set.hidden { opacity: 0 }
+      .chart__xAxeText {
+        transition: opacity 300ms;
+      }
+      .chart__xAxeText[hidden] {
+        opacity: 0;
+      }
     `;
   }
 
@@ -38,30 +41,54 @@ class TMainChartRenderer extends LitElement {
     this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
     const xShift = (-(this.width/this.viewwidth)*this.viewoffset).toFixed(2);
     const yAxeMap = this._computeYAxeMap();
+    const xAxeMap = this._computeXAxeMap();
+
     return svg`
       <svg
+        class="chart__svg"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         viewBox="0 0 ${this.width} ${this.height}">
-        ${yAxeMap.map(point => svg`
-          <path
-            d="M0 ${point.y}L${this.width} ${point.y}"
-            class="chart__axe"/>
-        `)}
-        ${this.chart.map(set => svg`
-          <path
-            d=${this._computePath(set.points)}
-            class="chart__set ${set.visible ? '' : 'hidden'}"
-            stroke="${set.color}"
-            transform="translate(${xShift})"/>
-        `)}
-        ${yAxeMap.map(point => svg`
-          <text
-            x="${point.x}"
-            y="${point.y-10}">
-            ${point.text}
-          </text>
-        `)}
+        <g>
+          ${yAxeMap.map(point => svg`
+            <path
+              d="M0 ${point.y}L${this.width} ${point.y}"
+              class="chart__yAxe"/>
+          `)}
+        </g>
+        <g transform="translate(${xShift})">
+          ${this.chart.map(set => svg`
+            <path
+              d=${this._computePath(set.points)}
+              class="chart__set ${set.visible ? '' : 'hidden'}"
+              stroke="${set.color}"/>
+          `)}
+        </g>
+        <g>
+          ${yAxeMap.map(point => svg`
+            <text
+              x=${point.x}
+              y=${point.y-10}>
+              ${point.text}
+            </text>
+          `)}
+        </g>
+      </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 ${this.width} 20">
+        <g transform="translate(${xShift})">
+          ${xAxeMap.map(point => svg`
+            <text
+              x=${point.x}
+              y="18"
+              class="chart__xAxeText"
+              ?hidden=${point.hidden}
+              text-anchor="end">
+              ${point.text}
+            </text>
+          `)}
+        </g>
       </svg>
     `;
   }
@@ -95,13 +122,14 @@ class TMainChartRenderer extends LitElement {
       this.style = 'display: block; height: 100%';
     }
     this.width = this.offsetWidth;
-    this.height = this.offsetHeight;
+    this.height = this.offsetHeight-20;
     this.yScale = this.height/this._getMaxDataHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
     this.yAxeScale = 50;
   }
 
   _computeYAxeMap() {
+    // 1, 2, 5, 10
     const step = this.yAxeScale*this.yScale;
     let points = [];
     let i = 0;
@@ -118,6 +146,23 @@ class TMainChartRenderer extends LitElement {
       i += 1;
     }
     return points;
+  }
+
+  _computeXAxeMap() {
+    const getBaseLog = (x, y) => Math.log(y) / Math.log(x);
+    const TEXT_W = 48;
+    const pow = Math.ceil(getBaseLog(0.5, this.xScale/TEXT_W));
+    const n = Math.pow(2,pow);
+    const odd = (this.chart[0].points.length-1)%2;
+    return this.chart[0].points.map((point,i,arr) => {
+      let j = arr.length-i-2;
+      let hidden = (j+odd)%n != 0;
+      return {
+        x: point.x*this.xScale,
+        hidden,
+        text: point.label
+      }
+    });
   }
 
   _computeYAxeScale(scale) {

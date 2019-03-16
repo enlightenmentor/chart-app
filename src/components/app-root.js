@@ -8,7 +8,7 @@ class AppRoot extends LitElement {
       :host([theme="light"]) {
         --accent: #1676f4;
         --primary-text: #192434;
-        --secondary-text: hsla(214, 43%, 19%, 0.61);
+        --secondary-text: hsla(214, 45%, 20%, 0.5);
         --tertiary-text: hsla(214, 53%, 23%, 0.16);
         --overflow-background: hsla(210, 60%, 95%, 0.7);
         --overflow-border: hsla(216, 15%, 80%, 0.6);
@@ -18,7 +18,7 @@ class AppRoot extends LitElement {
       :host([theme="dark"]) {
         --accent: #1676f4;
         --primary-text: hsla(0, 0%, 100%, 0.9);
-        --secondary-text: hsla(214, 80%, 86%, 0.41);;
+        --secondary-text: hsla(214, 80%, 86%, 0.41);
         --tertiary-text: hsla(214, 60%, 80%, 0.14);
         --overflow-background: hsla(214, 29%, 14%, 0.7);
         --overflow-border: hsla(214, 20%, 50%, 0.5);
@@ -49,7 +49,7 @@ class AppRoot extends LitElement {
       `)}
       <t-theme-switch
         .theme=${this.theme}
-        @theme-changed=${this.themeChanged}
+        @theme-changed=${e => this.themeChanged(e.detail.value)}
         class="app__theme-switch">
       </t-theme-switch>
     `
@@ -67,13 +67,13 @@ class AppRoot extends LitElement {
 
   constructor() {
     super();
-    this.theme = 'dark';
+    this.themeChanged('dark');
     this.charts = this._parseRowData(chartData);
   }
 
-  themeChanged(e) {
-    this.theme = e.detail.value;
-    switch(this.theme) {
+  themeChanged(theme) {
+    this.theme = theme;
+    switch(theme) {
       case 'light':
         document.body.style.backgroundColor = '#ffffff';
         break;
