@@ -7,12 +7,15 @@ const BASE_LOG = (x, y) => Math.log(y) / Math.log(x);
 class TMainChartRenderer extends LitElement {
   static get styles() {
     return css`
+      :host * {
+        user-select: none;
+      }
       text {
         font-size: 14px;
         fill: var(--secondary-text);
         transition: fill var(--color-tr-duration);
       }
-      .chart__yAxe {
+      .chart__yAxe, .chart__vert-line {
         fill: none;
         stroke-linecap: round;
         stroke-width: 1;
@@ -40,13 +43,15 @@ class TMainChartRenderer extends LitElement {
     this._checkMaxVisibleHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
     this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
-    const xShift = (-(this.width/this.viewwidth)*this.viewoffset).toFixed(2);
+    this._xShift = (-(this.width/this.viewwidth)*this.viewoffset);
     const yAxeMap = this._computeYAxeMap();
     const xAxeMap = this._computeXAxeMap();
 
     return svg`
       <svg
         class="chart__svg"
+        @mousemove=${this._mouseMoveHandler}
+        @mouseleave=${e => { this.tooltipX = 0}}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         viewBox="0 0 ${this.width} ${this.height}">
@@ -57,7 +62,7 @@ class TMainChartRenderer extends LitElement {
               class="chart__yAxe"/>
           `)}
         </g>
-        <g transform="translate(${xShift})">
+        <g transform="translate(${this._xShift.toFixed(2)})">
           ${this.chart.map(set => svg`
             <path
               d=${this._computePath(set.points)}
@@ -74,11 +79,15 @@ class TMainChartRenderer extends LitElement {
             </text>
           `)}
         </g>
+        ${this.tooltipX && svg`<path
+          d="M${this.tooltipX} 0L${this.tooltipX} ${this.height}"
+          class="chart__vert-line">
+        </path>`}
       </svg>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 ${this.width} 20">
-        <g transform="translate(${xShift})">
+        <g transform="translate(${this._xShift.toFixed(2)})">
           ${xAxeMap.map(point => svg`
             <text
               x=${point.x}
@@ -99,11 +108,14 @@ class TMainChartRenderer extends LitElement {
       chart: Array,
       viewwidth: Number,
       viewoffset: Number,
+      left: Number,
       width: Number,
       height: Number,
       xScale: Number,
       yScale: Number,
       yAxeScale: Number,
+      tooltipX: Number,
+      _xShift: Number,
       _prevVisibleSets: Number,
       _prevMaxHeight: Number
     }
@@ -122,11 +134,23 @@ class TMainChartRenderer extends LitElement {
     if (!this.offsetWidth || !this.offsetHeight) {
       this.style = 'display: block; height: 100%';
     }
-    this.width = this.offsetWidth;
-    this.height = this.offsetHeight-20;
+    const rect = this.getBoundingClientRect();
+    this.left = rect.left;
+    this.width = rect.width;
+    this.height = rect.height-20;
     this.yScale = this.height/this._getMaxDataHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
-    this.yAxeScale = this._scaleMove(70/this.yScale, 0);
+    this.yAxeScale = this._scaleMove(60/this.yScale, 0);
+  }
+
+  _mouseMoveHandler(e) {
+    let x = e.x - this.left;
+    x -= this._xShift;
+    x = Math.round(x/this.xScale)*this.xScale;
+    x += this._xShift;
+    if (x >= 0 && x <= this.width) {
+      this.tooltipX = x;
+    }
   }
 
   _computeYAxeMap() {
@@ -137,11 +161,11 @@ class TMainChartRenderer extends LitElement {
       let y = (this.height-step*i).toFixed(2);
       let text;
       if (y < 16) break;
-      if (y > 20) { text = this.yAxeScale*i }
+      if (y > 20) { text = this._shortify(this.yAxeScale*i) }
       points.push({
         x: 0,
         y,
-        text,
+        text
       })
       i += 1;
     }
@@ -167,9 +191,9 @@ class TMainChartRenderer extends LitElement {
   _computeYAxeScale(scale) {
     while(true) {
       let step = scale*this.yScale;
-      if (step > 100)
+      if (step > 90)
         scale = this._scaleMove(scale, -1);
-      else if (step < 40)
+      else if (step < 35)
         scale = this._scaleMove(scale, 1);
       else
         break;
@@ -199,6 +223,18 @@ class TMainChartRenderer extends LitElement {
       i = 0;
     }
     return scales[i]*pow10;
+  }
+
+  _shortify(n) {
+    var exp = String(n).length-1;
+    if (exp >= 9) 
+      return n/Math.pow(10,9)+'B';
+    else if (exp >= 6)
+      return n/Math.pow(10,6)+'M';
+    else if (exp >= 3)
+      return n/Math.pow(10,3)+'K';
+    else 
+      return n;
   }
 
   _computePath(set) {
