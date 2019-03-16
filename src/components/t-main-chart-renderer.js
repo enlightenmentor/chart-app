@@ -1,7 +1,8 @@
 import { LitElement, html, svg, css } from 'lit-element';
-import { repeat } from 'lit-html/directives/repeat';
 import throttle from '../utils/throttle.js';
 import animateValue from '../utils/animate.js';
+
+const BASE_LOG = (x, y) => Math.log(y) / Math.log(x);
 
 class TMainChartRenderer extends LitElement {
   static get styles() {
@@ -125,11 +126,10 @@ class TMainChartRenderer extends LitElement {
     this.height = this.offsetHeight-20;
     this.yScale = this.height/this._getMaxDataHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
-    this.yAxeScale = 50;
+    this.yAxeScale = this._scaleMove(70/this.yScale, 0);
   }
 
   _computeYAxeMap() {
-    // 1, 2, 5, 10
     const step = this.yAxeScale*this.yScale;
     let points = [];
     let i = 0;
@@ -149,9 +149,8 @@ class TMainChartRenderer extends LitElement {
   }
 
   _computeXAxeMap() {
-    const getBaseLog = (x, y) => Math.log(y) / Math.log(x);
     const TEXT_W = 48;
-    const pow = Math.ceil(getBaseLog(0.5, this.xScale/TEXT_W));
+    const pow = Math.ceil(BASE_LOG(0.5, this.xScale/TEXT_W));
     const n = Math.pow(2,pow);
     const odd = (this.chart[0].points.length-1)%2;
     return this.chart[0].points.map((point,i,arr) => {
@@ -168,15 +167,38 @@ class TMainChartRenderer extends LitElement {
   _computeYAxeScale(scale) {
     while(true) {
       let step = scale*this.yScale;
-      if (step > 100) {
-        scale /= 2;
-      } else if (step < 50) {
-        scale *= 2;
-      } else {
+      if (step > 100)
+        scale = this._scaleMove(scale, -1);
+      else if (step < 40)
+        scale = this._scaleMove(scale, 1);
+      else
         break;
-      }
     }
     return scale;
+  }
+
+  _scaleMove(scale, shift) {
+    const scales = [1,2,5];
+    let pow10 = Math.pow(10, scale.toFixed().length-1);
+    let oldI = scales.indexOf(scale/pow10);
+    if (oldI == -1) {
+      let dif = Infinity;
+      oldI = scales.reduce((res,item, i) => {
+        let newDif = Math.abs(item - scale/pow10);
+        res = newDif < dif ? i : res;
+        dif = newDif
+        return res;
+      }, -1);
+    }
+    let i = oldI+shift;
+    if (i == -1) {
+      pow10 *= 0.1;
+      i = 2;
+    } else if (i == 3) {
+      pow10 *= 10;
+      i = 0;
+    }
+    return scales[i]*pow10;
   }
 
   _computePath(set) {
