@@ -19,12 +19,13 @@ class TChartWrapper extends LitElement {
         transition: color var(--color-tr-duration);
       }
       .app__main-chart {
-        height: 40vh;
+        height: 30rem;
+        max-height: 50vh;
         margin: 0 1rem 1rem;
       }
       .app__chart-overview {
         margin: 0.5rem 1rem;
-        height: 7vh;
+        height: 3rem;
       }
       .app__actions {
         display: flex;

@@ -8,6 +8,7 @@ class AppRoot extends LitElement {
       :host([theme="light"]) {
         --accent: #1676f4;
         --primary-text: #192434;
+        --secondary-text: hsla(214, 43%, 19%, 0.61);
         --tertiary-text: hsla(214, 53%, 23%, 0.16);
         --overflow-background: hsla(210, 60%, 95%, 0.7);
         --overflow-border: hsla(216, 15%, 80%, 0.6);
@@ -17,7 +18,8 @@ class AppRoot extends LitElement {
       :host([theme="dark"]) {
         --accent: #1676f4;
         --primary-text: hsla(0, 0%, 100%, 0.9);
-        --tertiary-text: hsla(0, 0%, 100%, 0.3);
+        --secondary-text: hsla(214, 80%, 86%, 0.41);;
+        --tertiary-text: hsla(214, 60%, 80%, 0.14);
         --overflow-background: hsla(214, 29%, 14%, 0.7);
         --overflow-border: hsla(214, 20%, 50%, 0.5);
         --background: hsl(215, 27%, 19%);
