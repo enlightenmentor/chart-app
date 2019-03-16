@@ -67,7 +67,7 @@ class AppRoot extends LitElement {
 
   constructor() {
     super();
-    this.theme = 'light';
+    this.theme = 'dark';
     this.charts = this._parseRowData(chartData);
   }
 

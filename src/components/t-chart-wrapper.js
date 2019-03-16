@@ -14,7 +14,7 @@ class TChartWrapper extends LitElement {
         margin-bottom: 3rem;
       }
       .app__title {
-        margin: 1rem;
+        margin: 1rem 1.25rem;
         color: var(--primary-text);
         transition: color var(--color-tr-duration);
       }
@@ -81,7 +81,7 @@ class TChartWrapper extends LitElement {
   constructor() {
     super();
     this.viewportWidth = 0.25;
-    this.viewportOffset = 0.5;
+    this.viewportOffset = 0.75;
   }
 
   connectedCallback() {

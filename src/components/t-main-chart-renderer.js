@@ -11,10 +11,23 @@ class TMainChartRenderer extends LitElement {
       }
       text {
         font-size: 0.875rem;
-        transition: fill var(--color-tr-duration)
+        fill: var(--secondary-text);
+        transition: fill var(--color-tr-duration);
       }
-      .chart__axe { transition: stroke var(--color-tr-duration) }
-      .chart__set { transition: opacity 200ms }
+      .chart__axe {
+        fill: none;
+        stroke-linecap: round;
+        stroke-width: 1;
+        stroke: var(--tertiary-text);
+        transition: stroke var(--color-tr-duration);
+      }
+      .chart__set {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+        transition: opacity 200ms;
+      }
       .chart__set.hidden { opacity: 0 }
     `;
   }
@@ -24,36 +37,28 @@ class TMainChartRenderer extends LitElement {
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
     this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
     const xShift = (-(this.width/this.viewwidth)*this.viewoffset).toFixed(2);
+    const yAxeMap = this._computeYAxeMap();
     return svg`
       <svg
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         viewBox="0 0 ${this.width} ${this.height}">
-        <path
-          d=${this._computeYAxePath()}
-          class="chart__axe"
-          fill="none"
-          stroke="var(--tertiary-text)"
-          stroke-linecap="round"
-          stroke-width="1">
-        </path>
+        ${yAxeMap.map(point => svg`
+          <path
+            d="M0 ${point.y}L${this.width} ${point.y}"
+            class="chart__axe"/>
+        `)}
         ${this.chart.map(set => svg`
           <path
             d=${this._computePath(set.points)}
             class="chart__set ${set.visible ? '' : 'hidden'}"
-            fill="none"
             stroke="${set.color}"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            transform="translate(${xShift})"
-            stroke-width="2">
-          </path>
+            transform="translate(${xShift})"/>
         `)}
-        ${this._computeYLegendText().map(point => svg`
+        ${yAxeMap.map(point => svg`
           <text
-            fill="var(--secondary-text)"
             x="${point.x}"
-            y="${point.y}">
+            y="${point.y-10}">
             ${point.text}
           </text>
         `)}
@@ -96,34 +101,23 @@ class TMainChartRenderer extends LitElement {
     this.yAxeScale = 50;
   }
 
-  _computeYLegendText() {
+  _computeYAxeMap() {
     const step = this.yAxeScale*this.yScale;
     let points = [];
     let i = 0;
     while(true) {
       let y = (this.height-step*i).toFixed(2);
-      if (y < 20) break;
+      let text;
+      if (y < 16) break;
+      if (y > 20) { text = this.yAxeScale*i }
       points.push({
         x: 0,
-        y: y-10,
-        text: this.yAxeScale*i
+        y,
+        text,
       })
       i += 1;
     }
     return points;
-  }
-
-  _computeYAxePath(s) {
-    const step = this.yAxeScale*this.yScale;
-    let path = '';
-    let i = 0;
-    while(true) {
-      let y = (this.height-step*i).toFixed(2);
-      if (y < 16) break;
-      path += `M0 ${y}L${this.width} ${y}`
-      i += 1;
-    }
-    return path;
   }
 
   _computeYAxeScale(scale) {
@@ -178,7 +172,7 @@ class TMainChartRenderer extends LitElement {
       ) {
         let from = this.height/this._prevMaxHeight;
         let to = this.height/newMaxHeight;
-        this._animateScale(from,to,100);
+        this._animateScale(from,to,75);
       }
       this._prevMaxHeight = newMaxHeight;
     }
