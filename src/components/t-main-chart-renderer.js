@@ -250,7 +250,9 @@ class TMainChartRenderer extends LitElement {
     animateValue([from, to], {
       duration,
       easing: 'EASE_OUT_QUAD'
-    })(val => { this.yScale = val });
+    })(val => {
+      this.yScale = val
+    });
   }
 }
 

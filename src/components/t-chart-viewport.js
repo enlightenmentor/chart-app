@@ -149,7 +149,9 @@ class TChartViewport extends LitElement {
           this.offset = 0;
           this.width = 1-vROffset;
         } else if (this._vWidth < this.minWidth) {
-          this.offset = 1-vROffset-this.minWidth;
+          let offset = 1-vROffset-this.minWidth;
+          offset = offset < 0 ? 0 : offset;
+          this.offset = offset;
           this.width = this.minWidth;
         } else {
           this.offset = this._vOffset;
