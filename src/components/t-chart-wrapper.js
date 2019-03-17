@@ -1,7 +1,8 @@
 import { LitElement, html, css } from 'lit-element';
 import throttle from '../utils/throttle.js';
-import './t-main-chart.js';
-import './t-overview-chart.js';
+import './t-main-chart-renderer.js';
+import './t-overview-chart-renderer.js';
+import './t-chart-viewport.js';
 import './t-radio-button.js';
 import './t-theme-switch.js';
 
@@ -19,13 +20,24 @@ class TChartWrapper extends LitElement {
         transition: color var(--color-tr-duration);
       }
       .app__main-chart {
+        display: block;
+        position: relative;
         height: 30rem;
         max-height: 50vh;
         margin: 0 1rem 1rem;
       }
       .app__chart-overview {
-        margin: 0.5rem 1rem;
+        display: block;
+        position: relative;
         height: 3rem;
+        margin: 0.5rem 1rem;
+      }
+      .app__chart-viewport {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
       .app__actions {
         display: flex;
@@ -42,18 +54,27 @@ class TChartWrapper extends LitElement {
   render() {
     return html`
       <h3 class="app__title">${this.title}</h3>
-      <t-main-chart
+
+      <t-main-chart-renderer
         class="app__main-chart"
-        .width=${this.viewportWidth}
-        .offset=${this.viewportOffset}
+        .viewwidth=${this.viewportWidth}
+        .viewoffset=${this.viewportOffset}
         .chart=${this.chart}>
-      </t-main-chart>
-      <t-overview-chart
-        class="app__chart-overview"
-        .width=${this.viewportWidth}
-        .offset=${this.viewportOffset}
-        .chart=${this.chart}>
-      </t-overview-chart>
+      </t-main-chart-renderer>
+
+      <div class="app__chart-overview">
+        <t-overview-chart-renderer
+          class="chart__canvas"
+          .chart=${this.chart}>
+        </t-overview-chart-renderer>
+        <t-chart-viewport
+          class="app__chart-viewport"
+          width="${this.viewportWidth}"
+          min-width="0.1"
+          offset="${this.viewportOffset}">
+        </t-chart-viewport>
+      </div>
+
       <div class="app__actions">
         ${this.chart.map((set,i) => html`
           <t-radio-button

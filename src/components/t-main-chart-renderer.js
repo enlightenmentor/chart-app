@@ -46,7 +46,6 @@ class TMainChartRenderer extends LitElement {
         margin-left: -0.5px;
         width: 1px;
         background-color: var(--secondary-text);
-        transform: transition 100ms;
         pointer-events: none;
       }
       #chart__tooltip {
@@ -57,15 +56,14 @@ class TMainChartRenderer extends LitElement {
         background-color: var(--background);
         border-radius: 3px;
         box-shadow: 0 1px 4px -1px var(--shadow-color);
-        transform: translateX(-50%);
+        transform: translate(-50%, -25%);
         transition: background-color var(--color-tr-duration), box-shadow var(--color-tr-duration);
       }
       .chart__tooltip-title {
         white-space: nowrap;
         color: var(--primary-text);
         transition: color var(--color-tr-duration);
-        font-size: 1.125rem;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
       .chart__tooltip-body > div {
         display: flex;
@@ -82,17 +80,16 @@ class TMainChartRenderer extends LitElement {
         margin-right: 0.5rem;
       }
       .chart__tooltip-set > span:first-child {
-        font-size: 1.125rem;
         font-weight: bold;
         line-height: 1.25;
       }
       .chart__tooltip-set > span:last-child {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
       }
       .chart__line-circle {
         position: absolute;
         box-sizing: border-box;
-        top: 380.2px;
+        top: 0;
         height: 12px;
         width: 12px;
         transform: unset;
@@ -110,6 +107,7 @@ class TMainChartRenderer extends LitElement {
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
     this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
     this._xShift = (-(this.width/this.viewwidth)*this.viewoffset);
+    this._updateTooltip(this.hoveredI);
     const yAxeMap = this._computeYAxeMap();
     const xAxeMap = this._computeXAxeMap();
 
@@ -117,7 +115,9 @@ class TMainChartRenderer extends LitElement {
       <svg
         class="chart__svg"
         @mousemove=${this._mouseMoveHandler}
-        @mouseleave=${e => {}}
+        @mouseleave=${e => {
+          this.hoveredI = null
+        }}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         viewBox="0 0 ${this.width} ${this.height}">
@@ -172,7 +172,7 @@ class TMainChartRenderer extends LitElement {
                 class="chart__line-circle"
                 style="
                   border-color: ${point.color};
-                  top: ${(this.height - this.yScale*point.point.y).toFixed(1)}px;
+                  transform: translateY(${(this.height - this.yScale*point.point.y).toFixed(1)}px);
                 ">
               </div>
             `)}
@@ -212,6 +212,7 @@ class TMainChartRenderer extends LitElement {
       yScale: Number,
       yAxeScale: Number,
       tooltip: Number,
+      hoveredI: Number,
       _xShift: Number,
       _prevVisibleSets: Number,
       _prevMaxHeight: Number
@@ -244,8 +245,15 @@ class TMainChartRenderer extends LitElement {
     let x = e.x - this.left;
     x -= this._xShift;
     x = Math.round(x/this.xScale)*this.xScale;
-    const i = Math.round(x/this.xScale);
-    x += this._xShift;
+    this.hoveredI = Math.round(x/this.xScale);
+  }
+
+  _updateTooltip(i) {
+    if (i == null) {
+      this.tooltip = null;
+      return;
+    }
+    const x = i*this.xScale + this._xShift;
     if (x >= 0 && x <= this.width) {
       this.tooltip = {
         sets: this.chart
@@ -261,8 +269,11 @@ class TMainChartRenderer extends LitElement {
               res.push([set])
             return res;
           }, [[]]),
+        i,
         x: x.toFixed(2)
       };
+    } else {
+      this.tooltip = null;
     }
   }
 
