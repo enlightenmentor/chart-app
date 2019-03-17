@@ -5,7 +5,6 @@ class TRadioButton extends LitElement {
     return css`
       :host {
         --radio-button-color: var(--accent);
-        --border-color: var(--tertiary-text);
       }
 
       :host {

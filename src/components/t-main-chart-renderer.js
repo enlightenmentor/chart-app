@@ -7,6 +7,9 @@ const BASE_LOG = (x, y) => Math.log(y) / Math.log(x);
 class TMainChartRenderer extends LitElement {
   static get styles() {
     return css`
+      :host * {
+        user-select: none;
+      }
       text {
         font-size: 14px;
         fill: var(--secondary-text);
@@ -18,6 +21,9 @@ class TMainChartRenderer extends LitElement {
         stroke-width: 1;
         stroke: var(--tertiary-text);
         transition: stroke var(--color-tr-duration);
+      }
+      .chart__yAxe:first-child {
+        stroke: var(--secondary-text);
       }
       .chart__set {
         fill: none;
@@ -33,6 +39,69 @@ class TMainChartRenderer extends LitElement {
       .chart__xAxeText[hidden] {
         opacity: 0;
       }
+      .chart__hover-line {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin-left: -0.5px;
+        width: 1px;
+        background-color: var(--secondary-text);
+        transform: transition 100ms;
+        pointer-events: none;
+      }
+      #chart__tooltip {
+        display: flex;
+        position: absolute;
+        flex-direction: column;
+        padding: 0.5rem 0.75rem;
+        background-color: var(--background);
+        border-radius: 3px;
+        box-shadow: 0 1px 4px -1px var(--shadow-color);
+        transform: translateX(-50%);
+        transition: background-color var(--color-tr-duration), box-shadow var(--color-tr-duration);
+      }
+      .chart__tooltip-title {
+        white-space: nowrap;
+        color: var(--primary-text);
+        transition: color var(--color-tr-duration);
+        font-size: 1.125rem;
+        margin-bottom: 0.75rem;
+      }
+      .chart__tooltip-body > div {
+        display: flex;
+      }
+      .chart__tooltip-body > div:not(:last-child) {
+        margin-bottom: 0.5rem;
+      }
+      .chart__tooltip-set {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+      }
+      .chart__tooltip-set:not(:last-child) {
+        margin-right: 0.5rem;
+      }
+      .chart__tooltip-set > span:first-child {
+        font-size: 1.125rem;
+        font-weight: bold;
+        line-height: 1.25;
+      }
+      .chart__tooltip-set > span:last-child {
+        font-size: 0.875rem;
+      }
+      .chart__line-circle {
+        position: absolute;
+        box-sizing: border-box;
+        top: 380.2px;
+        height: 12px;
+        width: 12px;
+        transform: unset;
+        margin-left: -5.5px;
+        margin-top: -6px;
+        border-radius: 50%;
+        border: 2px solid;
+        background-color: var(--background);
+      }
     `;
   }
 
@@ -40,13 +109,15 @@ class TMainChartRenderer extends LitElement {
     this._checkMaxVisibleHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
     this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
-    const xShift = (-(this.width/this.viewwidth)*this.viewoffset).toFixed(2);
+    this._xShift = (-(this.width/this.viewwidth)*this.viewoffset);
     const yAxeMap = this._computeYAxeMap();
     const xAxeMap = this._computeXAxeMap();
 
-    return svg`
+    return html`
       <svg
         class="chart__svg"
+        @mousemove=${this._mouseMoveHandler}
+        @mouseleave=${e => {}}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         viewBox="0 0 ${this.width} ${this.height}">
@@ -57,7 +128,7 @@ class TMainChartRenderer extends LitElement {
               class="chart__yAxe"/>
           `)}
         </g>
-        <g transform="translate(${xShift})">
+        <g transform="translate(${this._xShift.toFixed(2)})">
           ${this.chart.map(set => svg`
             <path
               d=${this._computePath(set.points)}
@@ -78,7 +149,7 @@ class TMainChartRenderer extends LitElement {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 ${this.width} 20">
-        <g transform="translate(${xShift})">
+        <g transform="translate(${this._xShift.toFixed(2)})">
           ${xAxeMap.map(point => svg`
             <text
               x=${point.x}
@@ -91,6 +162,41 @@ class TMainChartRenderer extends LitElement {
           `)}
         </g>
       </svg>
+      ${this.tooltip != null ? html`
+        <div 
+          class="chart__hover-line"
+          style="transform: translateX(${this.tooltip.x}px); height: ${this.height}px;">
+          ${this.tooltip.sets.map(subset => html`
+            ${subset.map(point => html`
+              <div
+                class="chart__line-circle"
+                style="
+                  border-color: ${point.color};
+                  top: ${(this.height - this.yScale*point.point.y).toFixed(1)}px;
+                ">
+              </div>
+            `)}
+          `)}
+          <div id="chart__tooltip">
+            <span class="chart__tooltip-title">
+              ${this.tooltip.sets[0][0].point.day}, ${this.tooltip.sets[0][0].point.date}
+            </span>
+            <div class="chart__tooltip-body">
+              ${this.tooltip.sets.map(subset => html`
+                <div>
+                  ${subset.map(point => html`
+                    <div class="chart__tooltip-set">
+                      <span style="color: ${point.color}">${point.point.y}</span>
+                      <span style="color: ${point.color}">${point.name}</span>
+                    </div>
+                  `)}
+                </div>
+              `)}
+            </div>
+          </div>
+          
+        </div>
+      ` : null}
     `;
   }
 
@@ -99,11 +205,14 @@ class TMainChartRenderer extends LitElement {
       chart: Array,
       viewwidth: Number,
       viewoffset: Number,
+      left: Number,
       width: Number,
       height: Number,
       xScale: Number,
       yScale: Number,
       yAxeScale: Number,
+      tooltip: Number,
+      _xShift: Number,
       _prevVisibleSets: Number,
       _prevMaxHeight: Number
     }
@@ -122,11 +231,39 @@ class TMainChartRenderer extends LitElement {
     if (!this.offsetWidth || !this.offsetHeight) {
       this.style = 'display: block; height: 100%';
     }
-    this.width = this.offsetWidth;
-    this.height = this.offsetHeight-20;
+    const rect = this.getBoundingClientRect();
+    this.left = rect.left;
+    this.width = rect.width;
+    this.height = rect.height-20;
     this.yScale = this.height/this._getMaxDataHeight();
     this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
-    this.yAxeScale = this._scaleMove(70/this.yScale, 0);
+    this.yAxeScale = this._scaleShift(60/this.yScale, 0);
+  }
+
+  _mouseMoveHandler(e) {
+    let x = e.x - this.left;
+    x -= this._xShift;
+    x = Math.round(x/this.xScale)*this.xScale;
+    const i = Math.round(x/this.xScale);
+    x += this._xShift;
+    if (x >= 0 && x <= this.width) {
+      this.tooltip = {
+        sets: this.chart
+          .filter(set => set.visible)
+          .map(set => Object.assign({}, set, {
+            point: set.points[i]
+          }))
+          .reduce((res,set) => {
+            let i = res.length-1;
+            if (res[i].length < 2)
+              res[i].push(set)
+            else
+              res.push([set])
+            return res;
+          }, [[]]),
+        x: x.toFixed(2)
+      };
+    }
   }
 
   _computeYAxeMap() {
@@ -137,11 +274,11 @@ class TMainChartRenderer extends LitElement {
       let y = (this.height-step*i).toFixed(2);
       let text;
       if (y < 16) break;
-      if (y > 20) { text = this.yAxeScale*i }
+      if (y > 20) { text = this._shortify(this.yAxeScale*i) }
       points.push({
         x: 0,
         y,
-        text,
+        text
       })
       i += 1;
     }
@@ -159,7 +296,7 @@ class TMainChartRenderer extends LitElement {
       return {
         x: point.x*this.xScale,
         hidden,
-        text: point.label
+        text: point.date
       }
     });
   }
@@ -167,17 +304,17 @@ class TMainChartRenderer extends LitElement {
   _computeYAxeScale(scale) {
     while(true) {
       let step = scale*this.yScale;
-      if (step > 100)
-        scale = this._scaleMove(scale, -1);
-      else if (step < 40)
-        scale = this._scaleMove(scale, 1);
+      if (step > 90)
+        scale = this._scaleShift(scale, -1);
+      else if (step < 35)
+        scale = this._scaleShift(scale, 1);
       else
         break;
     }
     return scale;
   }
 
-  _scaleMove(scale, shift) {
+  _scaleShift(scale, shift) {
     const scales = [1,2,5];
     let pow10 = Math.pow(10, scale.toFixed().length-1);
     let oldI = scales.indexOf(scale/pow10);
@@ -199,6 +336,18 @@ class TMainChartRenderer extends LitElement {
       i = 0;
     }
     return scales[i]*pow10;
+  }
+
+  _shortify(n) {
+    var exp = String(n).length-1;
+    if (exp >= 9) 
+      return n/Math.pow(10,9)+'B';
+    else if (exp >= 6)
+      return n/Math.pow(10,6)+'M';
+    else if (exp >= 3)
+      return n/Math.pow(10,3)+'K';
+    else 
+      return n;
   }
 
   _computePath(set) {

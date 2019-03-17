@@ -8,10 +8,12 @@ class AppRoot extends LitElement {
       :host([theme="light"]) {
         --accent: #1676f4;
         --primary-text: #192434;
-        --secondary-text: hsl(214, 11%, 60%);
-        --tertiary-text: hsla(214, 53%, 23%, 0.16);
+        --secondary-text: hsl(215, 12%, 70%);
+        --tertiary-text: hsl(210, 20%, 94%);
         --overflow-background: hsla(210, 60%, 95%, 0.7);
         --overflow-border: hsla(216, 15%, 80%, 0.6);
+        --border-color: hsla(214, 53%, 23%, 0.16);
+        --shadow-color: #999;
         --background: #ffffff;
         --color-tr-duration: 0.3s;
       }
@@ -19,9 +21,11 @@ class AppRoot extends LitElement {
         --accent: #1676f4;
         --primary-text: hsla(0, 0%, 100%, 0.9);
         --secondary-text: hsl(213, 20%, 47%);
-        --tertiary-text: hsla(214, 60%, 80%, 0.14);
+        --tertiary-text: hsl(214, 29%, 23%);
         --overflow-background: hsla(214, 29%, 14%, 0.7);
         --overflow-border: hsla(214, 20%, 50%, 0.5);
+        --border-color: hsla(214, 64%, 82%, 0.23);
+        --shadow-color: #111;
         --background: hsl(215, 27%, 19%);
         --color-tr-duration: 0.3s;
       }
@@ -85,11 +89,12 @@ class AppRoot extends LitElement {
 
   _parseRowData(data) {
     const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     return data.map(chart => {
       return chart.columns.slice(1).map(set => {
         let key = set[0];
         return {
-          label: chart.names[key],
+          name: chart.names[key],
           color: chart.colors[key],
           visible: true,
           points: set.slice(1).map((val, i) => {
@@ -97,7 +102,8 @@ class AppRoot extends LitElement {
             return {
               x: i,
               y: val,
-              label: `${MONTHS_SHORT[t.getMonth()]} ${t.getDate()}`,
+              day: DAYS[t.getDay()],
+              date: `${MONTHS_SHORT[t.getMonth()]} ${t.getDate()}`,
             }
           })
         }

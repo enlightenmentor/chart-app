@@ -61,7 +61,7 @@ class TChartWrapper extends LitElement {
             ?checked=${set.visible}
             @checked-changed=${this.changeVisibility.bind(this,i)}
             style="--radio-button-color: ${set.color}">
-            ${set.label}
+            ${set.name}
           </t-radio-button>
         `)}
       </div>
