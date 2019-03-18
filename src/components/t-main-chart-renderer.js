@@ -103,101 +103,105 @@ class TMainChartRenderer extends LitElement {
   }
 
   render() {
-    this._checkMaxVisibleHeight();
-    this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
-    this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
-    this._xShift = (-(this.width/this.viewwidth)*this.viewoffset);
-    this._updateTooltip(this.hoveredI);
-    const yAxeMap = this._computeYAxeMap();
-    const xAxeMap = this._computeXAxeMap();
+    if (this.width && this.height) {
+      this._checkMaxVisibleHeight();
+      this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
+      this.yAxeScale = this._computeYAxeScale(this.yAxeScale);
+      this._xShift = (-(this.width/this.viewwidth)*this.viewoffset);
+      this._updateTooltip(this.hoveredI);
+      const yAxeMap = this._computeYAxeMap();
+      const xAxeMap = this._computeXAxeMap();
 
-    return html`
-      <svg
-        class="chart__svg"
-        @mousemove=${this._mouseMoveHandler}
-        @mouseleave=${e => {
-          this.hoveredI = null
-        }}
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-        viewBox="0 0 ${this.width} ${this.height}">
-        <g>
-          ${yAxeMap.map(point => svg`
-            <path
-              d="M0 ${point.y}L${this.width} ${point.y}"
-              class="chart__yAxe"/>
-          `)}
-        </g>
-        <g transform="translate(${this._xShift.toFixed(2)})">
-          ${this.chart.map(set => svg`
-            <path
-              d=${this._computePath(set.points)}
-              class="chart__set ${set.visible ? '' : 'hidden'}"
-              stroke="${set.color}"/>
-          `)}
-        </g>
-        <g>
-          ${yAxeMap.map(point => svg`
-            <text
-              x=${point.x}
-              y=${point.y-10}>
-              ${point.text}
-            </text>
-          `)}
-        </g>
-      </svg>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 ${this.width} 20">
-        <g transform="translate(${this._xShift.toFixed(2)})">
-          ${xAxeMap.map(point => svg`
-            <text
-              x=${point.x}
-              y="18"
-              class="chart__xAxeText"
-              ?hidden=${point.hidden}
-              text-anchor="end">
-              ${point.text}
-            </text>
-          `)}
-        </g>
-      </svg>
-      ${this.tooltip != null ? html`
-        <div 
-          class="chart__hover-line"
-          style="transform: translateX(${this.tooltip.x}px); height: ${this.height}px;">
-          ${this.tooltip.sets.map(subset => html`
-            ${subset.map(point => html`
-              <div
-                class="chart__line-circle"
-                style="
-                  border-color: ${point.color};
-                  transform: translateY(${(this.height - this.yScale*point.point.y).toFixed(1)}px);
-                ">
-              </div>
+      return html`
+        <svg
+          class="chart__svg"
+          @mousemove=${this._mouseMoveHandler}
+          @mouseleave=${e => {
+            this.hoveredI = null
+          }}
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          viewBox="0 0 ${this.width} ${this.height}">
+          <g>
+            ${yAxeMap.map(point => svg`
+              <path
+                d="M0 ${point.y}L${this.width} ${point.y}"
+                class="chart__yAxe"/>
             `)}
-          `)}
-          <div id="chart__tooltip">
-            <span class="chart__tooltip-title">
-              ${this.tooltip.sets[0][0].point.day}, ${this.tooltip.sets[0][0].point.date}
-            </span>
-            <div class="chart__tooltip-body">
-              ${this.tooltip.sets.map(subset => html`
-                <div>
-                  ${subset.map(point => html`
-                    <div class="chart__tooltip-set">
-                      <span style="color: ${point.color}">${point.point.y}</span>
-                      <span style="color: ${point.color}">${point.name}</span>
-                    </div>
-                  `)}
+          </g>
+          <g transform="translate(${this._xShift.toFixed(2)})">
+            ${this.chart.map(set => svg`
+              <path
+                d=${this._computePath(set.points)}
+                class="chart__set ${set.visible ? '' : 'hidden'}"
+                stroke="${set.color}"/>
+            `)}
+          </g>
+          <g>
+            ${yAxeMap.map(point => svg`
+              <text
+                x=${point.x}
+                y=${point.y-10}>
+                ${point.text}
+              </text>
+            `)}
+          </g>
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 ${this.width} 20">
+          <g transform="translate(${this._xShift.toFixed(2)})">
+            ${xAxeMap.map(point => svg`
+              <text
+                x=${point.x}
+                y="18"
+                class="chart__xAxeText"
+                ?hidden=${point.hidden}
+                text-anchor="end">
+                ${point.text}
+              </text>
+            `)}
+          </g>
+        </svg>
+        ${this.tooltip != null ? html`
+          <div 
+            class="chart__hover-line"
+            style="transform: translateX(${this.tooltip.x}px); height: ${this.height}px;">
+            ${this.tooltip.sets.map(subset => html`
+              ${subset.map(point => html`
+                <div
+                  class="chart__line-circle"
+                  style="
+                    border-color: ${point.color};
+                    transform: translateY(${(this.height - this.yScale*point.point.y).toFixed(1)}px);
+                  ">
                 </div>
               `)}
+            `)}
+            <div id="chart__tooltip">
+              <span class="chart__tooltip-title">
+                ${this.tooltip.sets[0][0].point.day}, ${this.tooltip.sets[0][0].point.date}
+              </span>
+              <div class="chart__tooltip-body">
+                ${this.tooltip.sets.map(subset => html`
+                  <div>
+                    ${subset.map(point => html`
+                      <div class="chart__tooltip-set">
+                        <span style="color: ${point.color}">${point.point.y}</span>
+                        <span style="color: ${point.color}">${point.name}</span>
+                      </div>
+                    `)}
+                  </div>
+                `)}
+              </div>
             </div>
+            
           </div>
-          
-        </div>
-      ` : null}
-    `;
+        ` : null}
+      `;
+    } else {
+      return html``;
+    }
   }
 
   static get properties() {
@@ -229,16 +233,21 @@ class TMainChartRenderer extends LitElement {
   }
 
   _defineDimensions() {
+    function defineDimensions() {
+      const rect = this.getBoundingClientRect();
+      this.left = rect.left;
+      this.width = rect.width;
+      this.height = rect.height-20;
+      this.yScale = this.height/this._getMaxDataHeight();
+      this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
+      this.yAxeScale = this._scaleShift(60/this.yScale, 0);
+    }
     if (!this.offsetWidth || !this.offsetHeight) {
       this.style = 'display: block; height: 100%';
+      setTimeout(defineDimensions.bind(this),0);
+    } else {
+      defineDimensions.call(this);
     }
-    const rect = this.getBoundingClientRect();
-    this.left = rect.left;
-    this.width = rect.width;
-    this.height = rect.height-20;
-    this.yScale = this.height/this._getMaxDataHeight();
-    this.xScale = (this.width/this.viewwidth)/this._getDataWidth();
-    this.yAxeScale = this._scaleShift(60/this.yScale, 0);
   }
 
   _mouseMoveHandler(e) {
