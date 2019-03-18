@@ -55,12 +55,13 @@ class TChartWrapper extends LitElement {
     return html`
       <h3 class="app__title">${this.title}</h3>
 
-      <t-main-chart-renderer
-        class="app__main-chart"
-        .viewwidth=${this.viewportWidth}
-        .viewoffset=${this.viewportOffset}
-        .chart=${this.chart}>
-      </t-main-chart-renderer>
+      <div class="app__main-chart">
+        <t-main-chart-renderer
+          .viewwidth=${this.viewportWidth}
+          .viewoffset=${this.viewportOffset}
+          .chart=${this.chart}>
+        </t-main-chart-renderer>
+      </div>
 
       <div class="app__chart-overview">
         <t-overview-chart-renderer

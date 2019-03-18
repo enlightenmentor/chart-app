@@ -15,28 +15,32 @@ class TOverviewChartRenderer extends LitElement {
   }
 
   render() {
-    this._checkVisibleSets();
-    return svg`
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-        viewBox="0 0 ${this.width} ${this.height}">
-        ${this.chart.map(set => {
-          let d = this._computePath(set.points);
-          return svg`
-            <path
-              d=${d}
-              class="${set.visible ? '' : 'hidden'}"
-              fill="none"
-              stroke="${set.color}"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1">
-            </path>
-          `;
-        })}
-      </svg>
-    `;
+    if (this.width && this.height) {
+      this._checkVisibleSets();
+      return html`
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          viewBox="0 0 ${this.width} ${this.height}">
+          ${this.chart.map(set => {
+            let d = this._computePath(set.points);
+            return svg`
+              <path
+                d=${d}
+                class="${set.visible ? '' : 'hidden'}"
+                fill="none"
+                stroke="${set.color}"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1">
+              </path>
+            `;
+          })}
+        </svg>
+      `;
+    } else {
+      return html``;
+    }
   }
 
   static get properties() {
@@ -60,13 +64,19 @@ class TOverviewChartRenderer extends LitElement {
   }
 
   _defineDimensions() {
+    function defineDimensions() {
+      const rect = this.getBoundingClientRect();
+      this.width = rect.width;
+      this.height = rect.height;
+      this.yScale = this.height/this._getDataHeight();
+      this.xScale = this.width/this._getDataWidth();
+    }
     if (!this.offsetWidth || !this.offsetHeight) {
       this.style = 'display: block; height: 100%';
+      setTimeout(defineDimensions.bind(this),0);
+    } else {
+      defineDimensions.call(this);
     }
-    this.width = this.offsetWidth;
-    this.height = this.offsetHeight;
-    this.yScale = this.height/this._getDataHeight();
-    this.xScale = this.width/this._getDataWidth();
   }
 
   _computePath(set) {
