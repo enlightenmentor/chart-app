@@ -1,4 +1,6 @@
 # CHART APP
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c34d44cd-815d-400c-b138-9cc05a291389/deploy-status)](https://app.netlify.com/sites/telegram-chart-app/deploys)
+
 
 Chart app for Telegram Coding Contest
 
