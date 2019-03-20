@@ -255,8 +255,13 @@ class TMainChartRenderer extends LitElement {
     this.hoveredI = this._getHoveredI(e.x);
   }
 
-  _touchMoveHandler(e) {
-    this.hoveredI = this._getHoveredI(e.touches[0].clientX);
+  get _touchMoveHandler() {
+    return {
+      handleEvent: function(e) {
+        this.hoveredI = this._getHoveredI(e.touches[0].clientX);
+      }.bind(this),
+      passive: true
+    }
   }
 
   _getHoveredI(x) {

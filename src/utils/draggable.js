@@ -76,9 +76,9 @@ export default function draggable(node) {
     }
   };
 
-  node.addEventListener('touchstart', startCallback);
-  node.addEventListener('touchmove', dragCallback);
-  window.addEventListener('touchend', endCallback);
+  node.addEventListener('touchstart', startCallback, {passive:true});
+  node.addEventListener('touchmove', dragCallback, {passive:true});
+  window.addEventListener('touchend', endCallback, {passive:true});
 
   node.addEventListener('mousedown', startCallback);
 
