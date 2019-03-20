@@ -116,6 +116,7 @@ class TMainChartRenderer extends LitElement {
         <svg
           class="chart__svg"
           @mousemove=${this._mouseMoveHandler}
+          @touchmove=${this._touchMoveHandler}
           @mouseleave=${e => {
             this.hoveredI = null
           }}
@@ -251,10 +252,18 @@ class TMainChartRenderer extends LitElement {
   }
 
   _mouseMoveHandler(e) {
-    let x = e.x - this.left;
+    this.hoveredI = this._getHoveredI(e.x);
+  }
+
+  _touchMoveHandler(e) {
+    this.hoveredI = this._getHoveredI(e.touches[0].clientX);
+  }
+
+  _getHoveredI(x) {
+    x = x - this.left;
     x -= this._xShift;
     x = Math.round(x/this.xScale)*this.xScale;
-    this.hoveredI = Math.round(x/this.xScale);
+    return Math.round(x/this.xScale);
   }
 
   _updateTooltip(i) {

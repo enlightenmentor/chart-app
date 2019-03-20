@@ -26,6 +26,7 @@ class TRadioButton extends LitElement {
         border-radius: 99rem;
         cursor: pointer;
         outline: none;
+        transition: border var(--color-tr-duration);
       }
       .toggler {
         display: flex;
@@ -54,7 +55,7 @@ class TRadioButton extends LitElement {
         height: calc(1.5rem - 2px);
         background-color: var(--background);
         border-radius: 50%;
-        transition: transform 0.1s ease-in-out;
+        transition: transform 0.1s ease-in-out, background-color var(--color-tr-duration);
       }
       :host([checked]) .toggler-icon {
         transform: scale(1);
