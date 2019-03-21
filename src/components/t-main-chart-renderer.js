@@ -15,6 +15,14 @@ class TMainChartRenderer extends LitElement {
         fill: var(--secondary-text);
         transition: fill var(--color-tr-duration);
       }
+      .chart__yAxe-text {
+        font-size: 14px;
+        line-height: 14px;
+        height: 14px;
+        color: var(--secondary-text);
+        text-shadow: 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background), 0 0 4px var(--background);
+        transition: color var(--color-tr-duration), text-shadow var(--color-tr-duration);
+      }
       .chart__yAxe {
         fill: none;
         stroke-linecap: round;
@@ -140,11 +148,13 @@ class TMainChartRenderer extends LitElement {
           </g>
           <g>
             ${yAxeMap.map(point => svg`
-              <text
+              <foreignObject
                 x=${point.x}
-                y=${point.y-10}>
-                ${point.text}
-              </text>
+                y=${point.y-30}
+                width="100"
+                height="20">
+                <span class="chart__yAxe-text">${point.text}</span>
+              </foreignObject>
             `)}
           </g>
         </svg>
