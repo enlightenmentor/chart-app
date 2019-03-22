@@ -1,10 +1,13 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const createDefaultConfig = require('@open-wc/building-webpack/default-config');
+const createDefaultConfig = require('@open-wc/building-webpack/modern-config');
+
+const development = !process.argv.find(arg => arg.includes('production'));
 
 const defaultConfig = createDefaultConfig({
-  indexJS: path.resolve(__dirname, './src/index.js'),
+  entry: path.resolve(__dirname, './src/index.js'),
+  indexHTML: path.resolve(__dirname, './index.html'),
 });
 
 const config = Object.assign({}, defaultConfig, {
@@ -16,7 +19,7 @@ const config = Object.assign({}, defaultConfig, {
       from: 'manifest.webmanifest',
       to: 'manifest.webmanifest',
     }]),
-    new SWPrecacheWebpackPlugin({
+    !development && new SWPrecacheWebpackPlugin({
       cacheId: 'telegram-chart-app',
       dontCacheBustUrlsMatching: /\.\w{8}\./,
       filename: 'sw.js',
@@ -24,7 +27,7 @@ const config = Object.assign({}, defaultConfig, {
       navigateFallback: '/',
       staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
     })
-  ])
+  ]).filter(_ => !!_)
 });
 
 module.exports = config;
